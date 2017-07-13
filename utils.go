@@ -65,7 +65,7 @@ func interfaceMapToArgumentMap(m map[string]interface{}) (ArgumentMap, error) {
 	out := ArgumentMap{}
 	var result error
 	for k, v := range m {
-		if a, e := NewArgument(v); e != nil {
+		if a, e := New(v); e != nil {
 			result = multierror.Append(result, e)
 		} else {
 			out[k] = a
@@ -76,8 +76,8 @@ func interfaceMapToArgumentMap(m map[string]interface{}) (ArgumentMap, error) {
 
 }
 
-// NewArgument makes a new argument from an interface or returns a error
-func NewArgument(i interface{}) (Argument, error) {
+// New makes a new argument from an interface or returns a error
+func New(i interface{}) (Argument, error) {
 
 	if a, ok := i.(Argument); ok {
 		return a, nil
@@ -110,10 +110,18 @@ func NewArgument(i interface{}) (Argument, error) {
 	return a, nil
 }
 
-// NewArgumentOrNil create a new argument or returns a nil Arguments
+func Must(i interface{}) Argument {
+	a, e := New(i)
+	if e != nil {
+		panic(e)
+	}
+	return a
+}
+
+// NewOrNil create a new argument or returns a nil Arguments
 // if an argument could not be created
-func NewArgumentOrNil(i interface{}) Argument {
-	if a, err := NewArgument(i); err == nil {
+func NewOrNil(i interface{}) Argument {
+	if a, err := New(i); err == nil {
 		return a
 	}
 	return NilArgument()
@@ -125,4 +133,8 @@ func NilArgument() Argument {
 	args.t = NilType
 	args.v = nil
 	return args
+}
+
+func Undefined() Argument {
+	return argumentPool.Get().(*argument)
 }

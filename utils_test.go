@@ -25,7 +25,7 @@ func TestRegister(t *testing.T) {
 
 	assert.NotNil(t, Register(&T{}, Test))
 
-	arg, err := NewArgument(&T{
+	arg, err := New(&T{
 		Rapper: "Test",
 	})
 

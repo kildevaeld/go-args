@@ -28,6 +28,15 @@ func (a *argument) Free() {
 	argumentPool.Put(a)
 }
 
+func (a *argument) Is(t ...Type) bool {
+	for _, tt := range t {
+		if tt == a.t {
+			return true
+		}
+	}
+	return false
+}
+
 func (a *argument) Call(arg ArgumentList) (Argument, error) {
 	if a.t == CallType {
 		if v, ok := a.v.(func(ArgumentList) (Argument, error)); ok {
