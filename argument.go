@@ -13,18 +13,24 @@ func (a *argument) Value() interface{} {
 	return a.v
 }
 
+func (a *argument) Valid() bool {
+	return a.v != UndefinedType
+}
+
 func (a *argument) Free() {
-	if free, ok := a.v.(Freeable); ok {
-		free.Free()
+	a.t = UndefinedType
+	if a.v != nil {
+		if free, ok := a.v.(Freeable); ok {
+			free.Free()
+		}
 	}
-	a.t = NilType
 	a.v = nil
 	argumentPool.Put(a)
 }
 
-func (a *argument) Call(arg Argument) (Argument, error) {
+func (a *argument) Call(arg ArgumentList) (Argument, error) {
 	if a.t == CallType {
-		if v, ok := a.v.(func(Argument) (Argument, error)); ok {
+		if v, ok := a.v.(func(ArgumentList) (Argument, error)); ok {
 			return v(arg)
 		} else if v, ok := a.v.(Call); ok {
 			return v.Call(arg)

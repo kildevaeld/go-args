@@ -9,10 +9,25 @@ import (
 type Type int
 
 const (
-	StringType Type = iota + 1
-	NumberType
+	UndefinedType Type = iota
 	BoolType
+	IntType
+	Int64Type
+	Int32Type
+	Int16Type
+	Int8Type
+	UintType
+	Uint64Type
+	Uint32Type
+	Uint16Type
+	Uint8Type
+	Float32Type
+	Float64Type
+	StringType
 	MapType
+	StringSliceType
+	ByteSliceType
+	ArgumentSliceType
 	CallType
 	ArgumentListType
 	ArgumentMapType
@@ -28,17 +43,18 @@ type Argument interface {
 	Freeable
 	Type() Type
 	Value() interface{}
+	Valid() bool
 }
 
 type Map map[string]interface{}
 
 type Call interface {
-	Call(args Argument) (Argument, error)
+	Call(args ArgumentList) (Argument, error)
 }
 
-type CallFunc func(args Argument) (Argument, error)
+type CallFunc func(args ArgumentList) (Argument, error)
 
-func (c CallFunc) Call(args Argument) (Argument, error) {
+func (c CallFunc) Call(args ArgumentList) (Argument, error) {
 	return c(args)
 }
 
