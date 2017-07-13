@@ -2,6 +2,8 @@ package args
 
 import multierror "github.com/hashicorp/go-multierror"
 
+// TypeFromInterface returns a Type from a an interface
+// or UndefinedType if it's unsupported
 func TypeFromInterface(i interface{}) Type {
 	switch i.(type) {
 	case bool:
@@ -74,6 +76,7 @@ func interfaceMapToArgumentMap(m map[string]interface{}) (ArgumentMap, error) {
 
 }
 
+// NewArgument makes a new argument from an interface or returns a error
 func NewArgument(i interface{}) (Argument, error) {
 
 	if a, ok := i.(Argument); ok {
@@ -107,6 +110,8 @@ func NewArgument(i interface{}) (Argument, error) {
 	return a, nil
 }
 
+// NewArgumentOrNil create a new argument or returns a nil Arguments
+// if an argument could not be created
 func NewArgumentOrNil(i interface{}) Argument {
 	if a, err := NewArgument(i); err == nil {
 		return a
@@ -114,6 +119,7 @@ func NewArgumentOrNil(i interface{}) Argument {
 	return NilArgument()
 }
 
+// NilArgument create a new nil argument
 func NilArgument() Argument {
 	args := argumentPool.Get().(*argument)
 	args.t = NilType
