@@ -1,9 +1,9 @@
 package args
 
 import (
-	"gopkg.in/yaml.v2"
-
 	"encoding/json"
+
+	"gopkg.in/yaml.v2"
 )
 
 type argument struct {
