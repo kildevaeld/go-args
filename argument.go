@@ -55,6 +55,10 @@ func (a *argument) Call(arg ArgumentList) (Argument, error) {
 	return nil, nil
 }
 
+func (a *argument) Describe() ArgumentDescription {
+	return Describe(a)
+}
+
 func (a *argument) MarshalJSON() ([]byte, error) {
 	if t := findTypeWithType(a.t); t != nil && t.e.MarshalJSON != nil {
 		return t.e.MarshalJSON(a.v)

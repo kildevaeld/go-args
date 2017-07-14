@@ -104,6 +104,7 @@ type Argument interface {
 	Value() interface{}
 	Valid() bool
 	Is(...Type) bool
+	Describe() ArgumentDescription
 }
 
 type Map map[string]interface{}

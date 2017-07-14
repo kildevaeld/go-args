@@ -87,3 +87,7 @@ func Describe(a Argument) ArgumentDescription {
 		}
 	}
 }
+
+func DescriptionToArgument(a ArgumentDescription) (Argument, error) {
+	return nil, nil
+}

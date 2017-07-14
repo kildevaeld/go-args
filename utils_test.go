@@ -22,6 +22,20 @@ func TestRegister(t *testing.T) {
 	if err := Register(&T{}, Extension{
 		Name: "Test",
 		Type: Test,
+		Describe: func(a interface{}) *ArgumentDescription {
+			v := a.(*T)
+			return &ArgumentDescription{
+				Name: "Test",
+				Type: Test,
+				Value: ArgumentDescription{
+					Name: ArgumentMapType.String(),
+					Type: ArgumentMapType,
+					Value: Map{
+						"Rapper": Must(v.Rapper).Describe(),
+					},
+				},
+			}
+		},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +58,7 @@ func TestRegister(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	b, _ := json.MarshalIndent(Describe(arg), "", "  ")
+	b, _ := json.MarshalIndent(arg.Describe(), "", "  ")
 	fmt.Printf("%s\n", b)
 	assert.Equal(t, arg.Type(), Test)
 
