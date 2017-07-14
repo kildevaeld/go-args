@@ -1,6 +1,7 @@
 package args
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -27,12 +28,15 @@ func TestFunction(t *testing.T) {
 		assert.Equal(t, first.Type(), ErrorType)
 		assert.EqualError(t, first.Value().(error), "error")
 
-		bs, _ := ToJSONIndented(Must(call))
-		fmt.Printf("%s\n", bs)
+		//bs, _ := ToJSONIndented(Must(call))
+		//fmt.Printf("%s\n", bs)
 	}
 
 	if _, err := FunctionToCall(func(m Map) {}); err != nil {
 		t.Fatal(err)
 	}
-
+	bs, err := json.Marshal(Must(MustMap(Map{
+		"Hello": "World",
+	})))
+	fmt.Printf("%s - %v\n", bs, err)
 }

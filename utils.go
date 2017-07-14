@@ -151,41 +151,48 @@ func interfaceMapToArgumentMap(m map[string]interface{}) (ArgumentMap, error) {
 }
 
 // New makes a new argument from an interface or returns a error
-func New(i interface{}) (Argument, error) {
-
-	if a, ok := i.(Argument); ok {
-		return a, nil
-	}
-
-	a := argumentPool.Get().(*argument)
-	a.v = i
-
-	if i == nil {
-		a.t = NilType
-		return a, nil
-	}
-
-	if a.t = TypeFromInterface(i); a.t == UndefinedType || a.t == CallType {
-		switch t := i.(type) {
-		case map[string]interface{}:
-			v, e := interfaceMapToArgumentMap(t)
-			if e != nil {
-				return nil, e
-			}
-			a.v = v
-		case map[string]Argument:
-			a.v = ArgumentMap(t)
-		case func(ArgumentList) (Argument, error):
-			a.v = CallFunc(t)
+func New(in ...interface{}) (Argument, error) {
+	l := len(in)
+	out := make([]Argument, l)
+	for index, i := range in {
+		if a, ok := i.(Argument); ok {
+			return a, nil
 		}
 
-	}
+		a := argumentPool.Get().(*argument)
+		a.v = i
 
-	return a, nil
+		if i == nil {
+			a.t = NilType
+			return a, nil
+		}
+
+		if a.t = TypeFromInterface(i); a.t == UndefinedType || a.t == CallType {
+			switch t := i.(type) {
+			case map[string]interface{}:
+				v, e := interfaceMapToArgumentMap(t)
+				if e != nil {
+					return nil, e
+				}
+				a.v = v
+			case map[string]Argument:
+				a.v = ArgumentMap(t)
+			case func(ArgumentList) (Argument, error):
+				a.v = CallFunc(t)
+			}
+
+		}
+
+		out[index] = a
+	}
+	if l == 1 {
+		return out[0], nil
+	}
+	return Must(out), nil
 }
 
-func Must(i interface{}) Argument {
-	a, e := New(i)
+func Must(i ...interface{}) Argument {
+	a, e := New(i...)
 	if e != nil {
 		panic(e)
 	}
@@ -194,8 +201,8 @@ func Must(i interface{}) Argument {
 
 // NewOrNil create a new argument or returns a nil Arguments
 // if an argument could not be created
-func NewOrNil(i interface{}) Argument {
-	if a, err := New(i); err == nil {
+func NewOrNil(i ...interface{}) Argument {
+	if a, err := New(i...); err == nil {
 		return a
 	}
 	return NilArgument()

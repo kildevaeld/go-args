@@ -1,5 +1,7 @@
 package args
 
+import "encoding/json"
+
 type argument struct {
 	t Type
 	v interface{}
@@ -47,4 +49,8 @@ func (a *argument) Call(arg ArgumentList) (Argument, error) {
 
 	}
 	return nil, nil
+}
+
+func (a *argument) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a.v)
 }
