@@ -74,6 +74,12 @@ func Describe(a Argument) ArgumentDescription {
 			}
 		}
 
+		if t := findTypeWithType(a.Type()); t != nil && t.e.Describe != nil {
+			if d := t.e.Describe(a.Value()); d != nil {
+				return *d
+			}
+		}
+
 		return ArgumentDescription{
 			Type:  a.Type(),
 			Name:  a.Type().String(),

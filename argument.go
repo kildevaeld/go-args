@@ -1,6 +1,10 @@
 package args
 
-import "encoding/json"
+import (
+	"gopkg.in/yaml.v2"
+
+	"encoding/json"
+)
 
 type argument struct {
 	t Type
@@ -52,5 +56,16 @@ func (a *argument) Call(arg ArgumentList) (Argument, error) {
 }
 
 func (a *argument) MarshalJSON() ([]byte, error) {
+	if t := findTypeWithType(a.t); t != nil && t.e.MarshalJSON != nil {
+		return t.e.MarshalJSON(a.v)
+	}
 	return json.Marshal(a.v)
+}
+
+func (a *argument) MarshalYAML() (interface{}, error) {
+	if t := findTypeWithType(a.t); t != nil && t.e.MarshalYAML != nil {
+		return t.e.MarshalYAML(a.v)
+	}
+
+	return yaml.Marshal(a.v)
 }

@@ -56,8 +56,8 @@ func TypeFromInterface(i interface{}) Type {
 		if _, ok := i.(Call); ok {
 			return CallType
 		}
-		if tt := findType(i); tt != nil && tt.t != UndefinedType {
-			return tt.t
+		if tt := findType(i); tt != nil && tt.e.Type != UndefinedType {
+			return tt.e.Type
 		}
 		if _, ok := i.(error); ok {
 			return ErrorType
@@ -125,8 +125,8 @@ func TypeFromReflectType(t reflect.Type) Type {
 		return UndefinedType
 
 	default:
-		if tt := findType(t); tt != nil && tt.t != UndefinedType {
-			return tt.t
+		if tt := findType(t); tt != nil && tt.e.Type != UndefinedType {
+			return tt.e.Type
 		} else if t.Implements(reflectError) {
 			return ErrorType
 		}

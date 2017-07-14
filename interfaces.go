@@ -1,8 +1,6 @@
 package args
 
 import (
-	"errors"
-	"reflect"
 	"sync"
 )
 
@@ -90,7 +88,7 @@ func (t Type) String() string {
 		return "nil"
 	default:
 		if v := findTypeWithType(t); v != nil {
-			return v.s
+			return v.e.Name
 		}
 	}
 	return ""
@@ -128,66 +126,4 @@ func init() {
 			return &argument{t: UndefinedType, v: nil}
 		},
 	}
-}
-
-type typemap struct {
-	t Type
-	v reflect.Type
-	s string
-}
-
-var _types []typemap
-
-func findType(v interface{}) *typemap {
-	var val reflect.Type
-	if vv, ok := v.(reflect.Type); ok {
-		val = vv
-	} else {
-		val = reflect.TypeOf(v)
-	}
-
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	for _, m := range _types {
-		if m.v == val {
-			return &m
-		}
-	}
-
-	return nil
-}
-
-func findTypeWithType(t Type) *typemap {
-	for _, v := range _types {
-		if t == v.t {
-			return &v
-		}
-	}
-	return nil
-}
-
-func Register(v interface{}, t Type, name string) error {
-	val := reflect.TypeOf(v)
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-	for _, r := range _types {
-		if r.t == t || r.v == val {
-			return errors.New("type already registered")
-		}
-	}
-
-	if t <= NilType {
-		return errors.New("cannot register core type")
-	}
-
-	_types = append(_types, typemap{
-		t: t,
-		v: val,
-		s: name,
-	})
-
-	return nil
 }
