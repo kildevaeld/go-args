@@ -57,6 +57,10 @@ func (a ArgumentMap) CheckField(field string, t Type) bool {
 		if first := f.Value().(ArgumentList).First(); first != nil {
 			return first.Type() == t
 		}
+	} else if f.Type() == ArgumentSliceType {
+		if first := f.Value().([]Argument)[0]; first != nil {
+			return first.Type() == t
+		}
 	}
 	return false
 }
@@ -70,4 +74,27 @@ func (a ArgumentMap) Check(m CheckMap) error {
 		}
 	}
 	return result
+}
+
+func NewMap(m map[string]interface{}) (ArgumentMap, error) {
+	out := make(map[string]Argument)
+	var result error
+	for k, v := range m {
+		a, e := New(v)
+		if e != nil {
+			result = multierror.Append(result, e)
+			a = Undefined()
+		}
+		out[k] = a
+	}
+
+	return out, result
+}
+
+func MustMap(m map[string]interface{}) ArgumentMap {
+	v, e := NewMap(m)
+	if e != nil {
+		panic(e)
+	}
+	return v
 }

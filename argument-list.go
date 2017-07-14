@@ -1,5 +1,7 @@
 package args
 
+import multierror "github.com/hashicorp/go-multierror"
+
 type ArgumentList []Argument
 
 func (a ArgumentList) Len() int {
@@ -25,4 +27,28 @@ func (a ArgumentList) ToInterfaceSlice() []interface{} {
 		out = append(out, i.Value())
 	}
 	return out
+}
+
+func NewList(in ...interface{}) (ArgumentList, error) {
+	out := make([]Argument, len(in))
+	var result error
+	for i, v := range in {
+		a, e := New(v)
+		if e != nil {
+			result = multierror.Append(result, e)
+			out[i] = Undefined()
+		} else {
+			out[i] = a
+		}
+	}
+
+	return ArgumentList(out), result
+}
+
+func MustList(in ...interface{}) ArgumentList {
+	v, e := NewList(in...)
+	if e != nil {
+		panic(e)
+	}
+	return v
 }

@@ -1,6 +1,10 @@
 package args
 
-import multierror "github.com/hashicorp/go-multierror"
+import (
+	"reflect"
+
+	multierror "github.com/hashicorp/go-multierror"
+)
 
 // TypeFromInterface returns a Type from a an interface
 // or UndefinedType if it's unsupported
@@ -52,13 +56,83 @@ func TypeFromInterface(i interface{}) Type {
 		if _, ok := i.(Call); ok {
 			return CallType
 		}
-		if tt := findType(i); tt != nil {
+		if tt := findType(i); tt != nil && tt.t != UndefinedType {
 			return tt.t
+		}
+		if _, ok := i.(error); ok {
+			return ErrorType
+		}
+		return UndefinedType
+	}
+
+}
+
+var reflectMap = reflect.TypeOf(Map{})
+var reflectAMap = reflect.TypeOf(ArgumentMap{})
+var reflectAList = reflect.TypeOf(ArgumentList{})
+var reflectSSlice = reflect.TypeOf([]string{})
+var reflectASlice = reflect.TypeOf([]Argument{})
+var reflectError = reflect.TypeOf((*error)(nil)).Elem()
+
+func TypeFromReflectType(t reflect.Type) Type {
+	switch t.Kind() {
+	case reflect.String:
+		return StringType
+	case reflect.Invalid:
+		return UndefinedType
+	case reflect.Bool:
+		return BoolType
+	case reflect.Int:
+		return IntType
+	case reflect.Int8:
+		return Int8Type
+	case reflect.Int16:
+		return Int16Type
+	case reflect.Int32:
+		return Int32Type
+	case reflect.Int64:
+		return Int64Type
+	case reflect.Uint:
+		return UintType
+	case reflect.Uint8:
+		return Uint8Type
+	case reflect.Uint16:
+		return Uint16Type
+	case reflect.Uint32:
+		return Uint32Type
+	case reflect.Uint64:
+		return Uint64Type
+	case reflect.Float32:
+		return Float32Type
+	case reflect.Float64:
+		return Float64Type
+	case reflect.Slice:
+		if t == reflectAList {
+			return ArgumentListType
+		} else if t == reflectSSlice {
+			return StringSliceType
+		} else if t == reflectASlice {
+			return ArgumentSliceType
+		}
+		return UndefinedType
+	case reflect.Map:
+		if t == reflectMap {
+			return MapType
+		}
+		if (t.Key().Kind() == reflect.String && t.Elem().Kind() == reflect.Interface) || t == reflectAMap {
+			return ArgumentMapType
+		}
+		return UndefinedType
+
+	default:
+		if tt := findType(t); tt != nil && tt.t != UndefinedType {
+			return tt.t
+		} else if t.Implements(reflectError) {
+			return ErrorType
 		}
 
 		return UndefinedType
 	}
-
 }
 
 func interfaceMapToArgumentMap(m map[string]interface{}) (ArgumentMap, error) {

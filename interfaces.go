@@ -32,6 +32,7 @@ const (
 	ArgumentListType
 	ArgumentMapType
 	ArgumentType
+	ErrorType
 	NilType
 )
 
@@ -83,8 +84,14 @@ func (t Type) String() string {
 		return "argument_map"
 	case ArgumentType:
 		return "argument"
+	case ErrorType:
+		return "error"
 	case NilType:
 		return "nil"
+	default:
+		if v := findTypeWithType(t); v != nil {
+			return v.s
+		}
 	}
 	return ""
 }
@@ -126,12 +133,19 @@ func init() {
 type typemap struct {
 	t Type
 	v reflect.Type
+	s string
 }
 
 var _types []typemap
 
 func findType(v interface{}) *typemap {
-	val := reflect.TypeOf(v)
+	var val reflect.Type
+	if vv, ok := v.(reflect.Type); ok {
+		val = vv
+	} else {
+		val = reflect.TypeOf(v)
+	}
+
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
 	}
@@ -145,7 +159,16 @@ func findType(v interface{}) *typemap {
 	return nil
 }
 
-func Register(v interface{}, t Type) error {
+func findTypeWithType(t Type) *typemap {
+	for _, v := range _types {
+		if t == v.t {
+			return &v
+		}
+	}
+	return nil
+}
+
+func Register(v interface{}, t Type, name string) error {
 	val := reflect.TypeOf(v)
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
@@ -163,6 +186,7 @@ func Register(v interface{}, t Type) error {
 	_types = append(_types, typemap{
 		t: t,
 		v: val,
+		s: name,
 	})
 
 	return nil

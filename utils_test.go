@@ -17,13 +17,13 @@ type R struct {
 }
 
 func TestRegister(t *testing.T) {
-	if err := Register(&T{}, Test); err != nil {
+	if err := Register(&T{}, Test, "test"); err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Nil(t, Register(&R{}, Test2))
+	assert.Nil(t, Register(&R{}, Test2, "test2"))
 
-	assert.NotNil(t, Register(&T{}, Test))
+	assert.NotNil(t, Register(&T{}, Test, "test"))
 
 	arg, err := New(&T{
 		Rapper: "Test",
