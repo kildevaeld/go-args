@@ -175,8 +175,20 @@ func New(in ...interface{}) (Argument, error) {
 					return nil, e
 				}
 				a.v = v
+				a.t = ArgumentMapType
 			case map[string]Argument:
 				a.v = ArgumentMap(t)
+				a.t = ArgumentMapType
+			case []interface{}:
+				var subs []Argument
+				for _, i := range t {
+					subs = append(subs, &argument{
+						t: TypeFromInterface(i),
+						v: i,
+					})
+				}
+				a.v = subs
+				a.t = ArgumentSliceType
 			case func(ArgumentList) (Argument, error):
 				a.v = CallFunc(t)
 			}
