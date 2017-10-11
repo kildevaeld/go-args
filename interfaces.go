@@ -94,6 +94,25 @@ func (t Type) String() string {
 	return ""
 }
 
+func (t Type) IsNumeric() bool {
+	switch t {
+	case IntType,
+		Int64Type,
+		Int32Type,
+		Int16Type,
+		Int8Type,
+		UintType,
+		Uint64Type,
+		Uint32Type,
+		Uint16Type,
+		Uint8Type,
+		Float32Type,
+		Float64Type:
+		return true
+	}
+	return false
+}
+
 type Freeable interface {
 	Free()
 }

@@ -1,6 +1,10 @@
 package args
 
-import multierror "github.com/hashicorp/go-multierror"
+import (
+	"fmt"
+
+	multierror "github.com/hashicorp/go-multierror"
+)
 
 type ArgumentList []Argument
 
@@ -12,6 +16,24 @@ func (a ArgumentList) First() Argument {
 		return a[0]
 	}
 	return nil
+}
+
+func (a ArgumentList) Check(args ...Type) error {
+	if len(a) != len(args) {
+		return fmt.Errorf("invalid length. expected %d, got %d", len(args), len(a))
+	}
+
+	var result error
+
+	for i, aa := range a {
+		t := args[i]
+		if t != aa.Type() {
+			result = multierror.Append(result, fmt.Errorf("invalid type at index '%d'. expected %d, found %d", i, t, aa.Type()))
+		}
+	}
+
+	return result
+
 }
 
 func (a *ArgumentList) Free() {
